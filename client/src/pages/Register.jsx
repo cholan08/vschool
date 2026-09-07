@@ -26,70 +26,96 @@ const Register = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-      <div className="card" style={{ maxWidth: 420, width: '100%' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem' }}>Create Account</h1>
-        <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-          Join vSchool today. It&apos;s free!
-        </p>
+    <div className="auth-shell">
+      {/* ─── LEFT PANEL (Branding) ────────────────────────────────────────── */}
+      <div className="auth-panel-left">
+        <div className="auth-brand">
+          <div className="auth-brand-icon">🌟</div>
+          <div className="auth-brand-name">
+            <h1>Absolute Special School</h1>
+            <p>&amp; Therapy Care</p>
+          </div>
+        </div>
 
-        {error && <p className="error-text" style={{ marginBottom: '1rem' }}>{error}</p>}
+        <div className="auth-hero">
+          <h2>Streamlined Care,<br/>Better Outcomes.</h2>
+          <p>
+            A comprehensive management platform designed for modern pediatric therapy centers. 
+            Coordinate across departments, track patient progress, and engage parents—all in one place.
+          </p>
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div className="form-group">
-            <label htmlFor="name">Full Name</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              className="input"
-              placeholder="John Doe"
-              value={form.name}
-              onChange={handleChange}
-              required
-            />
+      {/* ─── RIGHT PANEL (Form) ───────────────────────────────────────────── */}
+      <div className="auth-panel-right">
+        <div className="auth-form-container">
+          <div className="auth-form-header">
+            <h2>Create Account</h2>
+            <p>Join the Absolute Therapy platform today.</p>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              className="input"
-              placeholder="you@example.com"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          {error && (
+            <div className="mb-3" style={{ background: 'var(--error-bg)', border: '1px solid #fecaca', borderRadius: 'var(--r-md)', padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--error)' }}>
+              {error}
+            </div>
+          )}
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              className="input"
-              placeholder="Min. 6 characters"
-              value={form.password}
-              onChange={handleChange}
-              minLength={6}
-              required
-            />
-          </div>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div className="form-group">
+              <label className="form-label" htmlFor="name">Full Name</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                className="input"
+                placeholder="John Doe"
+                value={form.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          <button type="submit" className="btn btn-primary" disabled={loading} style={{ marginTop: '0.5rem' }}>
-            {loading ? 'Creating account...' : 'Create Account'}
-          </button>
-        </form>
+            <div className="form-group">
+              <label className="form-label" htmlFor="email">Email Address</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                className="input"
+                placeholder="name@example.com"
+                value={form.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label" htmlFor="password">Password</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                className="input"
+                placeholder="Min. 6 characters"
+                value={form.password}
+                onChange={handleChange}
+                minLength={6}
+                required
+              />
+            </div>
 
-        <p style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
-          Already have an account?{' '}
-          <Link to="/login" style={{ color: 'var(--color-primary)', fontWeight: 600, textDecoration: 'none' }}>
-            Sign In
-          </Link>
-        </p>
+            <button type="submit" className="btn btn-primary btn-lg mt-auto" disabled={loading}>
+              {loading ? <><span className="spinner spinner-sm" style={{ display: 'inline-block', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#fff' }} /> Creating account...</> : 'Create Account'}
+            </button>
+          </form>
+
+          <p style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+            Already have an account?{' '}
+            <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
+              Sign In
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

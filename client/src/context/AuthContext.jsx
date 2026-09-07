@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { authApi } from '../api/auth';
 
 const AuthContext = createContext(null);
@@ -7,25 +7,28 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const loadUser = useCallback(async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-    try {
-      const { data } = await authApi.getMe();
-      setUser(data);
-    } catch {
-      localStorage.removeItem('token');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
+    let isMounted = true;
+
+    const loadUser = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        if (isMounted) setLoading(false);
+        return;
+      }
+      try {
+        const { data } = await authApi.getMe();
+        if (isMounted) setUser(data);
+      } catch {
+        localStorage.removeItem('token');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
     loadUser();
-  }, [loadUser]);
+    return () => { isMounted = false; };
+  }, []);
 
   const login = async (credentials) => {
     const { data } = await authApi.login(credentials);
@@ -46,14 +49,31 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Convenience helpers
+  const isOwner = user?.role === 'owner';
+  const isAdmin = user?.role === 'admin';
+  const isTherapist = user?.role === 'therapist';
+  const isParent = user?.role === 'parent';
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        logout,
+        isOwner,
+        isAdmin,
+        isTherapist,
+        isParent,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used within an AuthProvider');

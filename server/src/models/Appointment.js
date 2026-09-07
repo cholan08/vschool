@@ -1,0 +1,77 @@
+import mongoose from 'mongoose';
+import { DEPARTMENT_KEYS, APPOINTMENT_STATUSES, TIME_SLOTS } from '../utils/constants.js';
+
+const appointmentSchema = new mongoose.Schema(
+  {
+    patient: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Patient',
+      required: [true, 'Patient is required'],
+    },
+    therapist: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: [true, 'Therapist is required'],
+    },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: [true, 'Branch is required'],
+    },
+    department: {
+      type: String,
+      enum: DEPARTMENT_KEYS,
+      required: [true, 'Department is required'],
+    },
+    // Appointment date (date only, time is in timeSlot)
+    date: {
+      type: Date,
+      required: [true, 'Appointment date is required'],
+    },
+    // 45-minute time slot (e.g., "10:30 - 11:15")
+    timeSlot: {
+      type: String,
+      enum: TIME_SLOTS,
+      required: [true, 'Time slot is required'],
+    },
+    status: {
+      type: String,
+      enum: APPOINTMENT_STATUSES,
+      default: 'scheduled',
+    },
+
+    // ─── Session Notes (therapist fills after session) ───────────────────────
+    sessionNotes: {
+      type: String,
+      default: '',
+    },
+    // Whether notes are visible to parent
+    parentVisible: {
+      type: Boolean,
+      default: false,
+    },
+    // Timestamp when notes were last updated
+    notesUpdatedAt: {
+      type: Date,
+      default: null,
+    },
+
+    // Admin who created this appointment
+    scheduledBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
+
+// ─── Compound index: prevent double-booking ───────────────────────────────────
+// A therapist cannot have two appointments on the same date + same time slot
+appointmentSchema.index({ therapist: 1, date: 1, timeSlot: 1 }, { unique: true });
+
+// Also prevent same patient booked in same slot on same date
+appointmentSchema.index({ patient: 1, date: 1, timeSlot: 1 }, { unique: true });
+
+const Appointment = mongoose.model('Appointment', appointmentSchema);
+export default Appointment;

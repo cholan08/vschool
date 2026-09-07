@@ -1,18 +1,29 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const ProtectedRoute = () => {
+/**
+ * ProtectedRoute — Blocks unauthenticated users
+ * Optionally restricts by role via allowedRoles prop
+ */
+const ProtectedRoute = ({ allowedRoles }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div className="loading-screen">
         <div className="spinner" />
+        <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Loading...</span>
       </div>
     );
   }
 
-  return user ? <Outlet /> : <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" replace />;
+
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <Outlet />;
 };
 
 export default ProtectedRoute;
