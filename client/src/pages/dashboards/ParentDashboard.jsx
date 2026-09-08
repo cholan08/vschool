@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
-import { useAuth } from '../../context/AuthContext';
 import { patientsApi } from '../../api/patients';
 import { appointmentsApi } from '../../api/appointments';
-import { getDeptLabel, getDeptColor, APPOINTMENT_STATUSES } from '../../utils/constants';
+import { getDeptLabel, getDeptColor } from '../../utils/constants';
+import { Link } from 'react-router-dom';
 
 const ParentDashboard = () => {
-  const { user } = useAuth();
   const [children, setChildren] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [progressNotes, setProgressNotes] = useState([]);
@@ -61,6 +60,9 @@ const ParentDashboard = () => {
           <h1 className="page-title">Parent Portal</h1>
           <p className="page-subtitle">Track your child's therapy progress, schedules, and clinical notes.</p>
         </div>
+        <Link to="/dashboard/progress" className="btn btn-primary">
+          📈 View Skill Milestones &amp; Home Plan
+        </Link>
       </div>
 
       {children.length === 0 ? (

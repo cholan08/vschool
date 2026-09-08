@@ -16,7 +16,7 @@ router.use(protect);
 
 router.get('/slots', authorize('owner', 'admin', 'therapist'), getAvailableSlots);
 router.get('/today', authorize('owner', 'admin', 'therapist'), getTodayAppointments);
-router.post('/', authorize('admin'), createAppointment);
+router.post('/', authorize('admin', 'therapist'), createAppointment);
 router.get('/', authorize('owner', 'admin', 'therapist', 'parent'), getAppointments);
 router.get('/:id', authorize('owner', 'admin', 'therapist', 'parent'), getAppointment);
 router.put('/:id', authorize('admin'), updateAppointment);

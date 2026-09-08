@@ -1,14 +1,19 @@
 import Appointment from '../models/Appointment.js';
 import { TIME_SLOTS } from '../utils/constants.js';
 
-// ─── Create Appointment (admin only) ─────────────────────────────────────────
+// ─── Create Appointment (admin & therapist) ──────────────────────────────────
 // @route  POST /api/appointments
 export const createAppointment = async (req, res) => {
-  const { patient, therapist, department, date, timeSlot } = req.body;
+  let { patient, therapist, department, date, timeSlot } = req.body;
   const branchId = req.user.branch?._id || req.user.branch;
 
   if (!branchId) {
-    return res.status(400).json({ message: 'Admin must be assigned to a branch' });
+    return res.status(400).json({ message: 'User must be assigned to a branch' });
+  }
+
+  // If therapist is booking, default therapist to themselves
+  if (req.user.role === 'therapist') {
+    therapist = req.user._id;
   }
 
   // Normalize date to just date portion (no time)
@@ -71,8 +76,13 @@ export const getAppointments = async (req, res) => {
   } else if (req.user.role === 'admin') {
     filter.branch = req.user.branch?._id;
   } else if (req.user.role === 'therapist') {
-    filter.therapist = req.user._id;
     filter.branch = req.user.branch?._id;
+    // If specific patient history requested, show patient's sessions (optionally by therapist)
+    if (!patient) {
+      filter.therapist = req.user._id;
+    } else if (therapist) {
+      filter.therapist = therapist;
+    }
   } else if (req.user.role === 'parent') {
     // Parent sees appointments for their children only
     // They get populated and we filter server-side
@@ -160,7 +170,7 @@ export const updateAppointment = async (req, res) => {
 // ─── Add session notes (therapist only) ──────────────────────────────────────
 // @route  PATCH /api/appointments/:id/notes
 export const addSessionNotes = async (req, res) => {
-  const { sessionNotes, parentVisible, status } = req.body;
+  const { sessionNotes, soapNotes, homeActivities, milestones, parentVisible, status } = req.body;
 
   const appointment = await Appointment.findById(req.params.id);
   if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
@@ -170,13 +180,45 @@ export const addSessionNotes = async (req, res) => {
     return res.status(403).json({ message: 'You can only add notes to your own sessions' });
   }
 
-  appointment.sessionNotes = sessionNotes ?? appointment.sessionNotes;
+  if (soapNotes) {
+    appointment.soapNotes = {
+      subjective: soapNotes.subjective ?? appointment.soapNotes?.subjective ?? '',
+      objective:  soapNotes.objective  ?? appointment.soapNotes?.objective  ?? '',
+      assessment: soapNotes.assessment ?? appointment.soapNotes?.assessment ?? '',
+      plan:       soapNotes.plan       ?? appointment.soapNotes?.plan       ?? '',
+    };
+  }
+
+  if (homeActivities !== undefined) appointment.homeActivities = homeActivities;
+  if (milestones !== undefined) appointment.milestones = milestones;
+
+  if (sessionNotes !== undefined) {
+    appointment.sessionNotes = sessionNotes;
+  } else if (soapNotes) {
+    // Generate text summary for backward compatibility
+    const parts = [
+      soapNotes.subjective ? `S: ${soapNotes.subjective}` : '',
+      soapNotes.objective  ? `O: ${soapNotes.objective}` : '',
+      soapNotes.assessment ? `A: ${soapNotes.assessment}` : '',
+      soapNotes.plan       ? `P: ${soapNotes.plan}` : '',
+    ].filter(Boolean);
+    if (parts.length > 0) {
+      appointment.sessionNotes = parts.join('\n\n');
+    }
+  }
+
   appointment.parentVisible = parentVisible ?? appointment.parentVisible;
   appointment.notesUpdatedAt = new Date();
   if (status) appointment.status = status;
 
   await appointment.save();
-  res.json(appointment);
+
+  const populated = await Appointment.findById(appointment._id)
+    .populate('patient', 'name dateOfBirth gender')
+    .populate('therapist', 'name email departments')
+    .populate('branch', 'name code');
+
+  res.json(populated);
 };
 
 // ─── Get available time slots for a therapist on a date ──────────────────────

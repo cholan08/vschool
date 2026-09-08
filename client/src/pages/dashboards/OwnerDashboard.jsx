@@ -58,9 +58,14 @@ const OwnerDashboard = () => {
           <h1 className="page-title">Clinic Overview</h1>
           <p className="page-subtitle">Monitor all branches and high-level metrics across your therapy network.</p>
         </div>
-        <Link to="/dashboard/branches" className="btn btn-primary">
-          + New Branch
-        </Link>
+        <div className="flex gap-2">
+          <Link to="/dashboard/staff" className="btn btn-secondary">
+            👥 Staff Directory
+          </Link>
+          <Link to="/dashboard/branches" className="btn btn-primary">
+            + New Branch
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}

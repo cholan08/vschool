@@ -4,9 +4,15 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import OwnerDashboard from './pages/dashboards/OwnerDashboard';
+import OwnerBranches from './pages/dashboards/owner/OwnerBranches';
+import OwnerStaff from './pages/dashboards/owner/OwnerStaff';
 import AdminDashboard from './pages/dashboards/AdminDashboard';
+import AdminPatients from './pages/dashboards/admin/AdminPatients';
+import AdminSchedule from './pages/dashboards/admin/AdminSchedule';
 import TherapistDashboard from './pages/dashboards/TherapistDashboard';
+import TherapistPatients from './pages/dashboards/therapist/TherapistPatients';
 import ParentDashboard from './pages/dashboards/ParentDashboard';
+import ParentProgress from './pages/dashboards/parent/ParentProgress';
 
 // Smart redirect: sends user to the correct dashboard for their role
 const RoleDashboard = () => {
@@ -37,24 +43,24 @@ function App() {
 
             {/* ─── Owner-only routes ──────────────────────────────────── */}
             <Route element={<ProtectedRoute allowedRoles={['owner']} />}>
-              <Route path="/dashboard/branches" element={<OwnerDashboard />} />
-              <Route path="/dashboard/staff" element={<OwnerDashboard />} />
+              <Route path="/dashboard/branches" element={<OwnerBranches />} />
+              <Route path="/dashboard/staff" element={<OwnerStaff />} />
             </Route>
 
             {/* ─── Admin-only routes ──────────────────────────────────── */}
             <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-              <Route path="/dashboard/patients" element={<AdminDashboard />} />
-              <Route path="/dashboard/schedule" element={<AdminDashboard />} />
+              <Route path="/dashboard/patients" element={<AdminPatients />} />
+              <Route path="/dashboard/schedule" element={<AdminSchedule />} />
             </Route>
 
             {/* ─── Therapist-only routes ──────────────────────────────── */}
             <Route element={<ProtectedRoute allowedRoles={['therapist']} />}>
-              <Route path="/dashboard/patients" element={<TherapistDashboard />} />
+              <Route path="/dashboard/patients" element={<TherapistPatients />} />
             </Route>
 
             {/* ─── Parent-only routes ─────────────────────────────────── */}
             <Route element={<ProtectedRoute allowedRoles={['parent']} />}>
-              <Route path="/dashboard/progress" element={<ParentDashboard />} />
+              <Route path="/dashboard/progress" element={<ParentProgress />} />
             </Route>
           </Route>
 

@@ -40,7 +40,31 @@ const appointmentSchema = new mongoose.Schema(
       default: 'scheduled',
     },
 
-    // ─── Session Notes (therapist fills after session) ───────────────────────
+    // ─── Clinical Documentation ───────────────────────────────────────────
+    // Pediatric Clinical SOAP Notes
+    soapNotes: {
+      subjective: { type: String, default: '' }, // Mood, energy, readiness, parent feedback
+      objective:  { type: String, default: '' }, // Specific exercises, sensory tasks, duration
+      assessment: { type: String, default: '' }, // Performance, behavioral compliance, milestones
+      plan:       { type: String, default: '' }, // Next steps, adjustments, homework recommendations
+    },
+    // Home recommendations / exercises specifically for parents
+    homeActivities: {
+      type: String,
+      default: '',
+    },
+    // Targeted clinical milestones/goals addressed in this session
+    milestones: [
+      {
+        goal: { type: String, trim: true },
+        status: {
+          type: String,
+          enum: ['achieved', 'in_progress', 'emerging', 'not_started'],
+          default: 'in_progress',
+        },
+      },
+    ],
+    // General summary note (kept for backwards compatibility)
     sessionNotes: {
       type: String,
       default: '',

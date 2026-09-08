@@ -2,19 +2,6 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { NAV_ITEMS, ROLES } from '../utils/constants';
 
-// Icon map (inline SVG components for clean look)
-const Icons = {
-  overview:   '▦',
-  branches:   '◫',
-  staff:      '◈',
-  today:      '◷',
-  patients:   '◉',
-  schedule:   '◱',
-  sessions:   '◈',
-  home:       '⌂',
-  progress:   '◈',
-  logout:     '→',
-};
 
 const DashboardLayout = ({ children }) => {
   const { user, logout } = useAuth();

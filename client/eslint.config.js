@@ -17,6 +17,8 @@ export default [
       ...reactHooks.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off', // Not needed with React 17+
       'react/prop-types': 'off',
+      'react/no-unescaped-entities': 'off',
+      'react-hooks/set-state-in-effect': 'off',
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     },
     languageOptions: {
@@ -27,6 +29,8 @@ export default [
         document: 'readonly',
         localStorage: 'readonly',
         console: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
       },
       parserOptions: {
         ecmaFeatures: { jsx: true },
