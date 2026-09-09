@@ -18,10 +18,11 @@ export const getDeptColor = (key) => DEPARTMENT_MAP[key]?.color || '#94a3b8';
 export const getDeptShort = (key) => DEPARTMENT_MAP[key]?.short || key;
 
 export const ROLES = {
-  owner:     { label: 'Clinic Owner',  color: '#f59e0b', icon: '👑' },
-  admin:     { label: 'Receptionist',  color: '#06b6d4', icon: '🏥' },
-  therapist: { label: 'Therapist',     color: '#10b981', icon: '💊' },
-  parent:    { label: 'Parent',        color: '#6366f1', icon: '👨‍👩‍👧' },
+  owner:     { label: 'Clinic Owner',           color: '#f59e0b', icon: '👑' },
+  admin:     { label: 'Branch Admin',           color: '#06b6d4', icon: '🛡️' },
+  therapist: { label: 'Therapist',              color: '#10b981', icon: '💊' },
+  teacher:   { label: 'Special School Teacher', color: '#8b5cf6', icon: '👩‍🏫' },
+  parent:    { label: 'Parent',                 color: '#6366f1', icon: '👨‍👩‍👧' },
 };
 
 export const TIME_SLOTS = [
@@ -47,18 +48,25 @@ export const PATIENT_STATUSES = {
 // Navigation items per role
 export const NAV_ITEMS = {
   owner: [
-    { path: '/dashboard',            label: 'Overview',       icon: '📊' },
-    { path: '/dashboard/branches',   label: 'Branches',       icon: '🏢' },
-    { path: '/dashboard/staff',      label: 'Staff',          icon: '👥' },
+    { path: '/dashboard',            label: 'Overview',                icon: '📊' },
+    { path: '/dashboard/branches',   label: 'Branches',                icon: '🏢' },
+    { path: '/dashboard/staff',      label: 'Staff',                   icon: '👥' },
   ],
   admin: [
-    { path: '/dashboard',            label: 'Today',          icon: '📅' },
-    { path: '/dashboard/patients',   label: 'Patients',       icon: '👶' },
-    { path: '/dashboard/schedule',   label: 'Schedule',       icon: '🗓️' },
+    { path: '/dashboard',            label: 'Today',                   icon: '⚡' },
+    { path: '/dashboard/patients',   label: 'Patients Details',        icon: '👶' },
+    { path: '/dashboard/schedule',   label: 'Scheduling & Monitoring', icon: '🗓️' },
+    { path: '/dashboard/staff',      label: 'Staffs',                  icon: '👥' },
+    { path: '/dashboard/reports',    label: 'Reports',                 icon: '📊' },
+    { path: '/dashboard/billing',    label: 'Fee Payments & Salary',   icon: '💳' },
   ],
   therapist: [
     { path: '/dashboard',            label: 'My Sessions',    icon: '📋' },
     { path: '/dashboard/patients',   label: 'My Patients',    icon: '👶' },
+  ],
+  teacher: [
+    { path: '/dashboard',            label: 'My Sessions & Classes', icon: '📋' },
+    { path: '/dashboard/patients',   label: 'My Students',           icon: '👶' },
   ],
   parent: [
     { path: '/dashboard',            label: 'Home',           icon: '🏠' },

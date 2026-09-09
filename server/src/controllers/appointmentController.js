@@ -11,8 +11,8 @@ export const createAppointment = async (req, res) => {
     return res.status(400).json({ message: 'User must be assigned to a branch' });
   }
 
-  // If therapist is booking, default therapist to themselves
-  if (req.user.role === 'therapist') {
+  // If therapist or teacher is booking, default therapist to themselves
+  if (['therapist', 'teacher'].includes(req.user.role)) {
     therapist = req.user._id;
   }
 
@@ -75,7 +75,7 @@ export const getAppointments = async (req, res) => {
     if (branch) filter.branch = branch;
   } else if (req.user.role === 'admin') {
     filter.branch = req.user.branch?._id;
-  } else if (req.user.role === 'therapist') {
+  } else if (['therapist', 'teacher'].includes(req.user.role)) {
     filter.branch = req.user.branch?._id;
     // If specific patient history requested, show patient's sessions (optionally by therapist)
     if (!patient) {
@@ -95,7 +95,7 @@ export const getAppointments = async (req, res) => {
     ];
   }
 
-  if (therapist && req.user.role !== 'therapist') filter.therapist = therapist;
+  if (therapist && !['therapist', 'teacher'].includes(req.user.role)) filter.therapist = therapist;
   if (patient) filter.patient = patient;
   if (department) filter.department = department;
   if (status && req.user.role !== 'parent') filter.status = status;
@@ -132,7 +132,7 @@ export const getAppointment = async (req, res) => {
 // ─── Update appointment (admin — reschedule, cancel) ─────────────────────────
 // @route  PUT /api/appointments/:id
 export const updateAppointment = async (req, res) => {
-  const { date, timeSlot, status, therapist } = req.body;
+  const { date, timeSlot, therapist } = req.body;
 
   const appointment = await Appointment.findById(req.params.id);
   if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
@@ -259,7 +259,7 @@ export const getTodayAppointments = async (req, res) => {
   };
 
   if (req.user.role === 'admin') filter.branch = req.user.branch?._id;
-  if (req.user.role === 'therapist') filter.therapist = req.user._id;
+  if (['therapist', 'teacher'].includes(req.user.role)) filter.therapist = req.user._id;
 
   const appointments = await Appointment.find(filter)
     .populate('patient', 'name gender')

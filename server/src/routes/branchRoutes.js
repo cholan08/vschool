@@ -13,8 +13,8 @@ const router = Router();
 router.use(protect); // all branch routes require auth
 
 router.post('/', authorize('owner'), createBranch);
-router.get('/', authorize('owner', 'admin', 'therapist'), getBranches);
-router.get('/:id', authorize('owner', 'admin', 'therapist'), getBranch);
+router.get('/', authorize('owner', 'admin', 'therapist', 'teacher'), getBranches);
+router.get('/:id', authorize('owner', 'admin', 'therapist', 'teacher'), getBranch);
 router.put('/:id', authorize('owner'), updateBranch);
 router.patch('/:id/toggle', authorize('owner'), toggleBranch);
 

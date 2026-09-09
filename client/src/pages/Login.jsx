@@ -28,8 +28,9 @@ const Login = () => {
   // Quick-fill for dev testing
   const devLogins = [
     { label: '👑 Owner', email: 'owner@pediatrictherapy.com' },
-    { label: '🏥 Admin', email: 'admin.main@pediatrictherapy.com' },
+    { label: '🛡️ Admin', email: 'admin.main@pediatrictherapy.com' },
     { label: '💊 Therapist', email: 'speech@pediatrictherapy.com' },
+    { label: '👩‍🏫 Teacher', email: 'teacher@pediatrictherapy.com' },
     { label: '👨‍👩‍👧 Parent', email: 'parent1@example.com' },
   ];
 

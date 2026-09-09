@@ -9,6 +9,9 @@ import OwnerStaff from './pages/dashboards/owner/OwnerStaff';
 import AdminDashboard from './pages/dashboards/AdminDashboard';
 import AdminPatients from './pages/dashboards/admin/AdminPatients';
 import AdminSchedule from './pages/dashboards/admin/AdminSchedule';
+import AdminStaff from './pages/dashboards/admin/AdminStaff';
+import AdminReports from './pages/dashboards/admin/AdminReports';
+import AdminBilling from './pages/dashboards/admin/AdminBilling';
 import TherapistDashboard from './pages/dashboards/TherapistDashboard';
 import TherapistPatients from './pages/dashboards/therapist/TherapistPatients';
 import ParentDashboard from './pages/dashboards/ParentDashboard';
@@ -22,9 +25,16 @@ const RoleDashboard = () => {
     case 'owner':     return <OwnerDashboard />;
     case 'admin':     return <AdminDashboard />;
     case 'therapist': return <TherapistDashboard />;
+    case 'teacher':   return <TherapistDashboard isTeacher={true} />;
     case 'parent':    return <ParentDashboard />;
     default:          return <Navigate to="/login" replace />;
   }
+};
+
+// Smart staff dashboard: Owner manages clinic-wide branches staff, Admin manages branch staff
+const StaffDashboard = () => {
+  const { user } = useAuth();
+  return user?.role === 'owner' ? <OwnerStaff /> : <AdminStaff />;
 };
 
 function App() {
@@ -44,17 +54,23 @@ function App() {
             {/* ─── Owner-only routes ──────────────────────────────────── */}
             <Route element={<ProtectedRoute allowedRoles={['owner']} />}>
               <Route path="/dashboard/branches" element={<OwnerBranches />} />
-              <Route path="/dashboard/staff" element={<OwnerStaff />} />
+            </Route>
+
+            {/* ─── Shared Owner / Admin routes ────────────────────────── */}
+            <Route element={<ProtectedRoute allowedRoles={['owner', 'admin']} />}>
+              <Route path="/dashboard/staff" element={<StaffDashboard />} />
+              <Route path="/dashboard/reports" element={<AdminReports />} />
             </Route>
 
             {/* ─── Admin-only routes ──────────────────────────────────── */}
             <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
               <Route path="/dashboard/patients" element={<AdminPatients />} />
               <Route path="/dashboard/schedule" element={<AdminSchedule />} />
+              <Route path="/dashboard/billing" element={<AdminBilling />} />
             </Route>
 
-            {/* ─── Therapist-only routes ──────────────────────────────── */}
-            <Route element={<ProtectedRoute allowedRoles={['therapist']} />}>
+            {/* ─── Therapist & Teacher routes ────────────────────────── */}
+            <Route element={<ProtectedRoute allowedRoles={['therapist', 'teacher']} />}>
               <Route path="/dashboard/patients" element={<TherapistPatients />} />
             </Route>
 

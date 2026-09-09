@@ -52,7 +52,8 @@ export const AuthProvider = ({ children }) => {
   // Convenience helpers
   const isOwner = user?.role === 'owner';
   const isAdmin = user?.role === 'admin';
-  const isTherapist = user?.role === 'therapist';
+  const isTherapist = ['therapist', 'teacher'].includes(user?.role);
+  const isTeacher = user?.role === 'teacher';
   const isParent = user?.role === 'parent';
 
   return (
@@ -66,6 +67,7 @@ export const AuthProvider = ({ children }) => {
         isOwner,
         isAdmin,
         isTherapist,
+        isTeacher,
         isParent,
       }}
     >

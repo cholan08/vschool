@@ -265,9 +265,9 @@ const AdminSchedule = () => {
       {/* Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Multi-Therapist Calendar Dispatch</h1>
+          <h1 className="page-title">Scheduling &amp; Monitoring</h1>
           <p className="page-subtitle">
-            Live schedule grid, session dispatch, and double-booking protection for {user?.branch?.name || 'Clinic'}.
+            Live schedule grid, therapist slot monitoring, room allocation, and session dispatch for {user?.branch?.name || 'Clinic'}.
           </p>
         </div>
 

@@ -15,8 +15,8 @@ router.use(protect);
 
 router.get('/stats', authorize('owner', 'admin'), getPatientStats);
 router.post('/', authorize('admin'), createPatient);
-router.get('/', authorize('owner', 'admin', 'therapist', 'parent'), getPatients);
-router.get('/:id', authorize('owner', 'admin', 'therapist', 'parent'), getPatient);
+router.get('/', authorize('owner', 'admin', 'therapist', 'teacher', 'parent'), getPatients);
+router.get('/:id', authorize('owner', 'admin', 'therapist', 'teacher', 'parent'), getPatient);
 router.put('/:id', authorize('admin'), updatePatient);
 router.patch('/:id/discharge', authorize('admin'), dischargePatient);
 

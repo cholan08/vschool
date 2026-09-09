@@ -59,7 +59,7 @@ const seed = async () => {
       email: 'main@pediatrictherapy.com',
       departments: [
         'pediatric_ot', 'speech_language', 'behavioral',
-        'sensory_integration', 'psychology',
+        'sensory_integration', 'psychology', 'special_school', 'special_education',
       ],
       createdBy: owner._id,
     });
@@ -141,6 +141,17 @@ const seed = async () => {
       branch: branch1._id,
       departments: ['behavioral', 'psychology'],
       phone: '+91 98765 00007',
+      createdBy: admin1._id,
+    });
+
+    const teacher1 = await User.create({
+      name: 'Ms. Radhika Sharma',
+      email: 'teacher@pediatrictherapy.com',
+      password: 'password123',
+      role: 'teacher',
+      branch: branch1._id,
+      departments: ['special_school', 'special_education'],
+      phone: '+91 98765 00008',
       createdBy: admin1._id,
     });
 

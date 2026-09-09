@@ -4,12 +4,12 @@ import Branch from '../models/Branch.js';
 // ─── Create user (owner creates admin/therapist; admin creates therapist/parent) ─
 // @route  POST /api/users
 export const createUser = async (req, res) => {
-  const { name, email, password, role, branch, departments, phone } = req.body;
+  const { name, email, password, role, departments, phone } = req.body;
 
-  // Admin can only create therapists and parents for their own branch
+  // Admin can only create therapists, teachers, and parents for their own branch
   if (req.user.role === 'admin') {
-    if (!['therapist', 'parent'].includes(role)) {
-      return res.status(403).json({ message: 'Admins can only create therapist or parent accounts' });
+    if (!['therapist', 'teacher', 'parent'].includes(role)) {
+      return res.status(403).json({ message: 'Admins can only create therapist, teacher, or parent accounts' });
     }
     // Force to admin's own branch
     req.body.branch = req.user.branch?._id;
@@ -53,7 +53,7 @@ export const getUsers = async (req, res) => {
     // Admin sees users in their branch only
     filter.branch = req.user.branch?._id;
     // Admin cannot list other owners/admins
-    filter.role = { $in: ['therapist', 'parent'] };
+    filter.role = { $in: ['therapist', 'teacher', 'parent'] };
   } else {
     // Owner can filter
     if (role) filter.role = role;
@@ -135,7 +135,7 @@ export const getBranchTherapists = async (req, res) => {
 
   if (!branchId) return res.status(400).json({ message: 'Branch is required' });
 
-  const filter = { role: 'therapist', branch: branchId, isActive: true };
+  const filter = { role: { $in: ['therapist', 'teacher'] }, branch: branchId, isActive: true };
   if (department) filter.departments = { $in: [department] };
 
   const therapists = await User.find(filter).select('name email phone departments').sort('name');

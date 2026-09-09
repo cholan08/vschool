@@ -63,7 +63,7 @@ export const getPatients = async (req, res) => {
     if (branch) filter.branch = branch;
   } else if (req.user.role === 'admin') {
     filter.branch = req.user.branch?._id;
-  } else if (req.user.role === 'therapist') {
+  } else if (['therapist', 'teacher'].includes(req.user.role)) {
     filter.assignedTherapists = { $in: [req.user._id] };
     filter.branch = req.user.branch?._id;
   } else if (req.user.role === 'parent') {
@@ -99,8 +99,8 @@ export const getPatient = async (req, res) => {
   if (role === 'admin' && patient.branch?._id?.toString() !== req.user.branch?._id?.toString()) {
     return res.status(403).json({ message: 'Access denied' });
   }
-  if (role === 'therapist' && !patient.assignedTherapists.some(t => t._id.toString() === req.user._id.toString())) {
-    return res.status(403).json({ message: 'Access denied — patient not assigned to you' });
+  if (['therapist', 'teacher'].includes(role) && !patient.assignedTherapists.some(t => t._id.toString() === req.user._id.toString())) {
+    return res.status(403).json({ message: 'Access denied — student/patient not assigned to you' });
   }
   if (role === 'parent' && patient.parent?._id?.toString() !== req.user._id.toString()) {
     return res.status(403).json({ message: 'Access denied' });

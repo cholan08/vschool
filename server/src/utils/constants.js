@@ -15,7 +15,7 @@ export const DEPARTMENTS = [
 export const DEPARTMENT_KEYS = DEPARTMENTS.map((d) => d.key);
 
 // ─── User Roles ───────────────────────────────────────────────────────────────
-export const ROLES = ['owner', 'admin', 'therapist', 'parent'];
+export const ROLES = ['owner', 'admin', 'therapist', 'teacher', 'parent'];
 
 // ─── Appointment Time Slots (10:30am – 7:30pm, 45-min each) ──────────────────
 // 12 slots per day per therapist
