@@ -3,6 +3,13 @@ import { DEPARTMENT_KEYS, PATIENT_STATUSES } from '../utils/constants.js';
 
 const patientSchema = new mongoose.Schema(
   {
+    // Unique human-readable Student / Patient ID (e.g. BR001-STU-0001)
+    studentId: {
+      type: String,
+      trim: true,
+      uppercase: true,
+    },
+
     // Child's details (filled by parent, entered by admin)
     name: {
       type: String,
@@ -17,6 +24,22 @@ const patientSchema = new mongoose.Schema(
       type: String,
       enum: ['male', 'female', 'other'],
       required: [true, 'Gender is required'],
+    },
+
+    // ─── Dual Facility Enrollment (School / Clinic) ─────────────────────────
+    // Child can be enrolled in School, Clinic, or Both
+    categories: {
+      type: [String],
+      enum: ['school', 'clinic'],
+      default: ['clinic'],
+    },
+
+    // ─── School Details (applicable when categories includes 'school') ──────
+    schoolDetails: {
+      grade: { type: String, trim: true, default: '' },
+      section: { type: String, trim: true, default: '' },
+      rollNo: { type: String, trim: true, default: '' },
+      academicYear: { type: String, trim: true, default: '' },
     },
 
     // ─── Parent Details (embedded for quick access) ─────────────────────────
@@ -35,11 +58,16 @@ const patientSchema = new mongoose.Schema(
       default: null,
     },
 
-    // ─── Clinic References ──────────────────────────────────────────────────
+    // ─── Clinic / Branch Reference ──────────────────────────────────────────
     branch: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Branch',
       required: [true, 'Branch is required'],
+    },
+    branchName: {
+      type: String,
+      trim: true,
+      default: '',
     },
 
     // Departments child is enrolled in (can be multiple)
@@ -86,6 +114,11 @@ const patientSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// ─── Compound Indexes for High Performance Multi-Tenancy ────────────────────
+patientSchema.index({ branch: 1, studentId: 1 }, { unique: true, sparse: true });
+patientSchema.index({ branch: 1, categories: 1 });
+patientSchema.index({ branch: 1, status: 1 });
+
 // Virtual: age in years
 patientSchema.virtual('age').get(function () {
   if (!this.dateOfBirth) return null;
@@ -101,4 +134,5 @@ patientSchema.set('toJSON', { virtuals: true });
 patientSchema.set('toObject', { virtuals: true });
 
 const Patient = mongoose.model('Patient', patientSchema);
+export const Student = Patient;
 export default Patient;

@@ -1,15 +1,14 @@
 /**
- * Seed Script — Pediatric Therapy Center
- * ----------------------------------------
- * Run: npm run seed  (from /server directory)
+ * Seed Script — 5-Branch Multi-Tenant Special School & Therapy Care
+ * -----------------------------------------------------------------
+ * Branches:
+ *  1. BR001 - Guduvancherry
+ *  2. BR002 - Vandalur
+ *  3. BR003 - Singaperumal Koil
+ *  4. BR004 - Kelambakkam
+ *  5. BR005 - Nanganallur
  *
- * Creates:
- *  - 2 Branches
- *  - 1 Clinic Owner
- *  - 2 Branch Admins (1 per branch)
- *  - 4 Therapists (across different departments)
- *  - 2 Parents with 2 children each
- *  - Sample appointments
+ * Run: npm run seed  (from /server directory)
  */
 
 import mongoose from 'mongoose';
@@ -25,6 +24,19 @@ import Branch from './models/Branch.js';
 import Patient from './models/Patient.js';
 import Appointment from './models/Appointment.js';
 
+const ALL_DEPARTMENTS = [
+  'pediatric_ot',
+  'special_school',
+  'speech_language',
+  'physiotherapy',
+  'special_education',
+  'behavioral',
+  'sensory_integration',
+  'learning_disabilities',
+  'vision_therapy',
+  'psychology',
+];
+
 const seed = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -39,210 +51,287 @@ const seed = async () => {
     ]);
     console.log('🗑  Cleared existing data');
 
-    // ─── Create Owner ────────────────────────────────────────────────────────
+    // ─── Create Owner (Super Admin) ─────────────────────────────────────────
     const owner = await User.create({
-      name: 'Sasikumar',
-      email: 'owner@pediatrictherapy.com',
+      name: 'Sasikumar (Founder & Director)',
+      email: 'owner@vschool.com',
       password: 'password123',
       role: 'owner',
       phone: '+91 98765 00001',
       isActive: true,
     });
 
-    // ─── Create Branches ─────────────────────────────────────────────────────
-    const branch1 = await Branch.create({
-      name: 'Absolute Special School & Therapy Care — Main',
-      code: 'ASST-MAIN',
-      address: '42, MG Road, Indiranagar',
-      city: 'Bangalore',
-      phone: '+91 80 4567 8900',
-      email: 'main@pediatrictherapy.com',
-      departments: [
-        'pediatric_ot', 'speech_language', 'behavioral',
-        'sensory_integration', 'psychology', 'special_school', 'special_education',
-      ],
-      createdBy: owner._id,
-    });
+    // ─── Create 5 Branches ──────────────────────────────────────────────────
+    const branchesData = [
+      {
+        name: 'Guduvancherry Branch',
+        code: 'BR001',
+        city: 'Chennai',
+        address: 'GST Road, Guduvancherry',
+        phone: '+91 44 2746 5001',
+        email: 'guduvancherry@vschool.com',
+        facilities: ['school', 'clinic'],
+        departments: ALL_DEPARTMENTS,
+        createdBy: owner._id,
+      },
+      {
+        name: 'Vandalur Branch',
+        code: 'BR002',
+        city: 'Chennai',
+        address: 'Near Zoo Road, Vandalur',
+        phone: '+91 44 2746 5002',
+        email: 'vandalur@vschool.com',
+        facilities: ['school', 'clinic'],
+        departments: ALL_DEPARTMENTS,
+        createdBy: owner._id,
+      },
+      {
+        name: 'Singaperumal Koil Branch',
+        code: 'BR003',
+        city: 'Chengalpattu',
+        address: 'Main Bazaar, Singaperumal Koil',
+        phone: '+91 44 2746 5003',
+        email: 'spkoil@vschool.com',
+        facilities: ['school', 'clinic'],
+        departments: ALL_DEPARTMENTS,
+        createdBy: owner._id,
+      },
+      {
+        name: 'Kelambakkam Branch',
+        code: 'BR004',
+        city: 'Chennai',
+        address: 'OMR Junction, Kelambakkam',
+        phone: '+91 44 2746 5004',
+        email: 'kelambakkam@vschool.com',
+        facilities: ['school', 'clinic'],
+        departments: ALL_DEPARTMENTS,
+        createdBy: owner._id,
+      },
+      {
+        name: 'Nanganallur Branch',
+        code: 'BR005',
+        city: 'Chennai',
+        address: '4th Main Road, Nanganallur',
+        phone: '+91 44 2746 5005',
+        email: 'nanganallur@vschool.com',
+        facilities: ['school', 'clinic'],
+        departments: ALL_DEPARTMENTS,
+        createdBy: owner._id,
+      },
+    ];
 
-    const branch2 = await Branch.create({
-      name: 'Absolute Special School & Therapy Care — South',
-      code: 'ASST-SOUTH',
-      address: '18, 100 Feet Road, JP Nagar',
-      city: 'Bangalore',
-      phone: '+91 80 4567 8901',
-      email: 'south@pediatrictherapy.com',
-      departments: [
-        'physiotherapy', 'special_education', 'special_school',
-        'learning_disabilities', 'vision_therapy',
-      ],
-      createdBy: owner._id,
-    });
+    const branches = await Branch.insertMany(branchesData);
+    const [brGuduvancherry, brVandalur, brSPKoil, brKelambakkam, brNanganallur] = branches;
 
-    // ─── Create Branch Admins ─────────────────────────────────────────────────
-    const admin1 = await User.create({
-      name: 'Priya Sharma',
-      email: 'admin.main@pediatrictherapy.com',
+    // ─── Create Branch Admins for All 5 Branches ────────────────────────────
+    const adminGdv = await User.create({
+      name: 'Kavitha S. (Admin - Guduvancherry)',
+      email: 'admin.guduvancherry@vschool.com',
       password: 'password123',
       role: 'admin',
-      branch: branch1._id,
-      phone: '+91 98765 00002',
+      branch: brGuduvancherry._id,
+      phone: '+91 98765 10001',
       createdBy: owner._id,
     });
 
-    const admin2 = await User.create({
-      name: 'Anita Kumar',
-      email: 'admin.south@pediatrictherapy.com',
+    const adminVdl = await User.create({
+      name: 'Ramesh K. (Admin - Vandalur)',
+      email: 'admin.vandalur@vschool.com',
       password: 'password123',
       role: 'admin',
-      branch: branch2._id,
-      phone: '+91 98765 00003',
+      branch: brVandalur._id,
+      phone: '+91 98765 10002',
       createdBy: owner._id,
     });
 
-    // ─── Create Therapists ────────────────────────────────────────────────────
-    const therapist1 = await User.create({
-      name: 'Ms. Deepa Nair',
-      email: 'speech@pediatrictherapy.com',
+    const adminSpk = await User.create({
+      name: 'Priya M. (Admin - Singaperumal Koil)',
+      email: 'admin.spkoil@vschool.com',
+      password: 'password123',
+      role: 'admin',
+      branch: brSPKoil._id,
+      phone: '+91 98765 10003',
+      createdBy: owner._id,
+    });
+
+    const adminKlb = await User.create({
+      name: 'Suresh R. (Admin - Kelambakkam)',
+      email: 'admin.kelambakkam@vschool.com',
+      password: 'password123',
+      role: 'admin',
+      branch: brKelambakkam._id,
+      phone: '+91 98765 10004',
+      createdBy: owner._id,
+    });
+
+    const adminNgl = await User.create({
+      name: 'Anitha V. (Admin - Nanganallur)',
+      email: 'admin.nanganallur@vschool.com',
+      password: 'password123',
+      role: 'admin',
+      branch: brNanganallur._id,
+      phone: '+91 98765 10005',
+      createdBy: owner._id,
+    });
+
+    // ─── Create Therapists & Teachers ───────────────────────────────────────
+    const therapistGdvSpeech = await User.create({
+      name: 'Deepa Nair (Speech Therapist)',
+      email: 'speech.gdv@vschool.com',
       password: 'password123',
       role: 'therapist',
-      branch: branch1._id,
+      branch: brGuduvancherry._id,
       departments: ['speech_language'],
-      phone: '+91 98765 00004',
-      createdBy: admin1._id,
+      phone: '+91 98765 20001',
+      createdBy: adminGdv._id,
     });
 
-    const therapist2 = await User.create({
-      name: 'Ms. Kavitha Rao',
-      email: 'ot@pediatrictherapy.com',
+    const therapistGdvOT = await User.create({
+      name: 'Karthik Raja (OT Specialist)',
+      email: 'ot.gdv@vschool.com',
       password: 'password123',
       role: 'therapist',
-      branch: branch1._id,
+      branch: brGuduvancherry._id,
       departments: ['pediatric_ot', 'sensory_integration'],
-      phone: '+91 98765 00005',
-      createdBy: admin1._id,
+      phone: '+91 98765 20002',
+      createdBy: adminGdv._id,
     });
 
-    const therapist3 = await User.create({
-      name: 'Mr. Arun Pillai',
-      email: 'physio@pediatrictherapy.com',
-      password: 'password123',
-      role: 'therapist',
-      branch: branch2._id,
-      departments: ['physiotherapy'],
-      phone: '+91 98765 00006',
-      createdBy: admin2._id,
-    });
-
-    const therapist4 = await User.create({
-      name: 'Ms. Sneha Iyer',
-      email: 'behavior@pediatrictherapy.com',
-      password: 'password123',
-      role: 'therapist',
-      branch: branch1._id,
-      departments: ['behavioral', 'psychology'],
-      phone: '+91 98765 00007',
-      createdBy: admin1._id,
-    });
-
-    const teacher1 = await User.create({
-      name: 'Ms. Radhika Sharma',
-      email: 'teacher@pediatrictherapy.com',
+    const teacherGdvSpecial = await User.create({
+      name: 'Radhika Sundaram (Special Educator)',
+      email: 'teacher.gdv@vschool.com',
       password: 'password123',
       role: 'teacher',
-      branch: branch1._id,
+      branch: brGuduvancherry._id,
       departments: ['special_school', 'special_education'],
-      phone: '+91 98765 00008',
-      createdBy: admin1._id,
+      phone: '+91 98765 20003',
+      createdBy: adminGdv._id,
     });
 
-    // ─── Create Parents ───────────────────────────────────────────────────────
-    const parent1 = await User.create({
-      name: 'Ravi Verma',
-      email: 'parent1@example.com',
+    const therapistVdlPhysio = await User.create({
+      name: 'Arun Pillai (Physiotherapist)',
+      email: 'physio.vdl@vschool.com',
+      password: 'password123',
+      role: 'therapist',
+      branch: brVandalur._id,
+      departments: ['physiotherapy'],
+      phone: '+91 98765 20004',
+      createdBy: adminVdl._id,
+    });
+
+    // ─── Create Parents ─────────────────────────────────────────────────────
+    const parentGdv = await User.create({
+      name: 'Venkatesh Babu',
+      email: 'parent.gdv@example.com',
       password: 'password123',
       role: 'parent',
-      phone: '+91 98765 10001',
-      createdBy: admin1._id,
+      phone: '+91 98765 30001',
+      createdBy: adminGdv._id,
     });
 
-    const parent2 = await User.create({
-      name: 'Sunita Patel',
-      email: 'parent2@example.com',
+    const parentVdl = await User.create({
+      name: 'Lakshmi Narayanan',
+      email: 'parent.vdl@example.com',
       password: 'password123',
       role: 'parent',
-      phone: '+91 98765 10002',
-      createdBy: admin2._id,
+      phone: '+91 98765 30002',
+      createdBy: adminVdl._id,
     });
 
-    // ─── Create Patients ──────────────────────────────────────────────────────
-    const patient1 = await Patient.create({
-      name: 'Aryan Verma',
-      dateOfBirth: new Date('2018-03-15'),
+    // ─── Create Students / Patients with Dual Facility & Human-Readable IDs ─
+    // Student 1: In Guduvancherry — Dual Enrolled (School + Clinic)
+    const student1 = await Patient.create({
+      studentId: 'BR001-STU-0001',
+      name: 'Arun Venkatesh',
+      dateOfBirth: new Date('2018-05-12'),
       gender: 'male',
-      parentDetails: {
-        name: 'Ravi Verma',
-        phone: '+91 98765 10001',
-        email: 'parent1@example.com',
-        relationship: 'Father',
-        address: '42, MG Road, Indiranagar, Bangalore',
+      categories: ['school', 'clinic'],
+      schoolDetails: {
+        grade: 'Primary Level 1',
+        section: 'A',
+        rollNo: '04',
+        academicYear: '2025-2026',
       },
-      parent: parent1._id,
-      branch: branch1._id,
-      enrolledDepartments: ['speech_language', 'pediatric_ot'],
-      assignedTherapists: [therapist1._id, therapist2._id],
+      parentDetails: {
+        name: 'Venkatesh Babu',
+        phone: '+91 98765 30001',
+        email: 'parent.gdv@example.com',
+        relationship: 'Father',
+        address: '24, Vallalar Street, Guduvancherry',
+      },
+      parent: parentGdv._id,
+      branch: brGuduvancherry._id,
+      branchName: brGuduvancherry.name,
+      enrolledDepartments: ['special_school', 'speech_language', 'pediatric_ot'],
+      assignedTherapists: [therapistGdvSpeech._id, therapistGdvOT._id, teacherGdvSpecial._id],
       diagnosis: 'Autism Spectrum Disorder (ASD)',
-      medicalNotes: 'Requires consistent routine. Responds well to visual aids.',
+      medicalNotes: 'Attends morning school and afternoon therapy twice a week.',
       status: 'active',
-      registeredBy: admin1._id,
+      registeredBy: adminGdv._id,
     });
 
-    const patient2 = await Patient.create({
-      name: 'Meera Verma',
-      dateOfBirth: new Date('2020-07-22'),
+    // Student 2: In Guduvancherry — Clinic Only
+    const student2 = await Patient.create({
+      studentId: 'BR001-STU-0002',
+      name: 'Diya Venkatesh',
+      dateOfBirth: new Date('2020-08-20'),
       gender: 'female',
+      categories: ['clinic'],
+      schoolDetails: {},
       parentDetails: {
-        name: 'Ravi Verma',
-        phone: '+91 98765 10001',
-        email: 'parent1@example.com',
+        name: 'Venkatesh Babu',
+        phone: '+91 98765 30001',
+        email: 'parent.gdv@example.com',
         relationship: 'Father',
-        address: '42, MG Road, Indiranagar, Bangalore',
+        address: '24, Vallalar Street, Guduvancherry',
       },
-      parent: parent1._id,
-      branch: branch1._id,
-      enrolledDepartments: ['behavioral'],
-      assignedTherapists: [therapist4._id],
-      diagnosis: 'ADHD',
-      medicalNotes: 'Hyperactive, difficulty with sustained attention.',
+      parent: parentGdv._id,
+      branch: brGuduvancherry._id,
+      branchName: brGuduvancherry.name,
+      enrolledDepartments: ['speech_language'],
+      assignedTherapists: [therapistGdvSpeech._id],
+      diagnosis: 'Speech Sound Delay',
+      medicalNotes: 'Speech articulation exercises weekly.',
       status: 'active',
-      registeredBy: admin1._id,
+      registeredBy: adminGdv._id,
     });
 
-    const patient3 = await Patient.create({
-      name: 'Dev Patel',
-      dateOfBirth: new Date('2017-11-05'),
+    // Student 3: In Vandalur — School Only
+    const student3 = await Patient.create({
+      studentId: 'BR002-STU-0001',
+      name: 'Devan Lakshmi',
+      dateOfBirth: new Date('2017-10-10'),
       gender: 'male',
-      parentDetails: {
-        name: 'Sunita Patel',
-        phone: '+91 98765 10002',
-        email: 'parent2@example.com',
-        relationship: 'Mother',
-        address: '18, 100 Feet Road, JP Nagar, Bangalore',
+      categories: ['school'],
+      schoolDetails: {
+        grade: 'Special Secondary 1',
+        section: 'B',
+        rollNo: '08',
+        academicYear: '2025-2026',
       },
-      parent: parent2._id,
-      branch: branch2._id,
-      enrolledDepartments: ['physiotherapy', 'learning_disabilities'],
-      assignedTherapists: [therapist3._id],
-      diagnosis: 'Cerebral Palsy (mild)',
-      medicalNotes: 'Requires physiotherapy 3x/week. Mild learning delays.',
+      parentDetails: {
+        name: 'Lakshmi Narayanan',
+        phone: '+91 98765 30002',
+        email: 'parent.vdl@example.com',
+        relationship: 'Mother',
+        address: '15, GST Main Road, Vandalur',
+      },
+      parent: parentVdl._id,
+      branch: brVandalur._id,
+      branchName: brVandalur.name,
+      enrolledDepartments: ['special_school', 'special_education'],
+      assignedTherapists: [therapistVdlPhysio._id],
+      diagnosis: 'Learning Disability & Dyslexia',
+      medicalNotes: 'Enrolled in full-time special school program.',
       status: 'active',
-      registeredBy: admin2._id,
+      registeredBy: adminVdl._id,
     });
 
-    // Update parent children references
-    await User.findByIdAndUpdate(parent1._id, { children: [patient1._id, patient2._id] });
-    await User.findByIdAndUpdate(parent2._id, { children: [patient3._id] });
+    // Update parent linked children
+    await User.findByIdAndUpdate(parentGdv._id, { children: [student1._id, student2._id] });
+    await User.findByIdAndUpdate(parentVdl._id, { children: [student3._id] });
 
-    // ─── Create Sample Appointments ───────────────────────────────────────────
+    // ─── Create Sample Appointments ─────────────────────────────────────────
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -251,71 +340,57 @@ const seed = async () => {
 
     await Appointment.insertMany([
       {
-        patient: patient1._id,
-        therapist: therapist1._id,
-        branch: branch1._id,
+        patient: student1._id,
+        therapist: therapistGdvSpeech._id,
+        branch: brGuduvancherry._id,
         department: 'speech_language',
         date: today,
         timeSlot: '10:30 - 11:15',
         status: 'scheduled',
-        scheduledBy: admin1._id,
+        scheduledBy: adminGdv._id,
       },
       {
-        patient: patient1._id,
-        therapist: therapist2._id,
-        branch: branch1._id,
+        patient: student1._id,
+        therapist: therapistGdvOT._id,
+        branch: brGuduvancherry._id,
         department: 'pediatric_ot',
         date: today,
         timeSlot: '11:15 - 12:00',
         status: 'scheduled',
-        scheduledBy: admin1._id,
+        scheduledBy: adminGdv._id,
       },
       {
-        patient: patient2._id,
-        therapist: therapist4._id,
-        branch: branch1._id,
-        department: 'behavioral',
-        date: today,
-        timeSlot: '14:15 - 15:00',
-        status: 'scheduled',
-        scheduledBy: admin1._id,
-      },
-      {
-        patient: patient3._id,
-        therapist: therapist3._id,
-        branch: branch2._id,
-        department: 'physiotherapy',
-        date: today,
-        timeSlot: '10:30 - 11:15',
-        status: 'scheduled',
-        scheduledBy: admin2._id,
-      },
-      {
-        patient: patient1._id,
-        therapist: therapist1._id,
-        branch: branch1._id,
+        patient: student2._id,
+        therapist: therapistGdvSpeech._id,
+        branch: brGuduvancherry._id,
         department: 'speech_language',
         date: tomorrow,
         timeSlot: '10:30 - 11:15',
         status: 'scheduled',
-        scheduledBy: admin1._id,
+        scheduledBy: adminGdv._id,
       },
     ]);
 
-    console.log('\n✅ Seed complete! Login credentials:\n');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('ROLE        EMAIL                               PASSWORD');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`Owner       owner@pediatrictherapy.com          password123`);
-    console.log(`Admin-Main  admin.main@pediatrictherapy.com     password123`);
-    console.log(`Admin-South admin.south@pediatrictherapy.com    password123`);
-    console.log(`Therapist   speech@pediatrictherapy.com         password123`);
-    console.log(`Therapist   ot@pediatrictherapy.com             password123`);
-    console.log(`Therapist   physio@pediatrictherapy.com         password123`);
-    console.log(`Therapist   behavior@pediatrictherapy.com       password123`);
-    console.log(`Parent      parent1@example.com                 password123`);
-    console.log(`Parent      parent2@example.com                 password123`);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('\n======================================================');
+    console.log('✅ SEED COMPLETED: 5 BRANCHES & MULTI-TENANT ARCHITECTURE');
+    console.log('======================================================');
+    console.log('Branches Created:');
+    branches.forEach((b) => {
+      console.log(` • [${b.code}] ${b.name} (${b.city}) — Facilities: ${b.facilities.join(', ')}`);
+    });
+
+    console.log('\nLogin Credentials:');
+    console.log('------------------------------------------------------');
+    console.log('Owner (All Branches)  : owner@vschool.com / password123');
+    console.log('Admin Guduvancherry   : admin.guduvancherry@vschool.com / password123');
+    console.log('Admin Vandalur        : admin.vandalur@vschool.com / password123');
+    console.log('Admin SP Koil         : admin.spkoil@vschool.com / password123');
+    console.log('Admin Kelambakkam     : admin.kelambakkam@vschool.com / password123');
+    console.log('Admin Nanganallur     : admin.nanganallur@vschool.com / password123');
+    console.log('Therapist Speech (GDV): speech.gdv@vschool.com / password123');
+    console.log('Teacher Special (GDV) : teacher.gdv@vschool.com / password123');
+    console.log('Parent Guduvancherry  : parent.gdv@example.com / password123');
+    console.log('======================================================\n');
 
     process.exit(0);
   } catch (err) {

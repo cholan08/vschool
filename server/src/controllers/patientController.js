@@ -1,13 +1,17 @@
 import Patient from '../models/Patient.js';
 import User from '../models/User.js';
+import Branch from '../models/Branch.js';
 
-// ─── Register a new patient (admin only) ─────────────────────────────────────
+// ─── Register a new patient/student (admin only) ─────────────────────────────
 // @route  POST /api/patients
 export const createPatient = async (req, res) => {
   const {
+    studentId: customStudentId,
     name,
     dateOfBirth,
     gender,
+    categories,
+    schoolDetails,
     parentDetails,
     enrolledDepartments,
     assignedTherapists,
@@ -19,16 +23,31 @@ export const createPatient = async (req, res) => {
 
   const branchId = req.user.branch?._id || req.user.branch;
   if (!branchId) {
-    return res.status(400).json({ message: 'Admin must be assigned to a branch to register patients' });
+    return res.status(400).json({ message: 'Admin must be assigned to a branch to register students/patients' });
+  }
+
+  const branchDoc = await Branch.findById(branchId);
+  const branchName = branchDoc?.name || '';
+
+  // Generate or sanitize readable studentId
+  let studentId = customStudentId?.trim()?.toUpperCase();
+  if (!studentId) {
+    const branchCode = branchDoc?.code || 'BR';
+    const totalInBranch = await Patient.countDocuments({ branch: branchId });
+    studentId = `${branchCode}-STU-${String(totalInBranch + 1).padStart(4, '0')}`;
   }
 
   const patient = await Patient.create({
+    studentId,
     name,
     dateOfBirth,
     gender,
+    categories: categories && categories.length > 0 ? categories : ['clinic'],
+    schoolDetails: schoolDetails || {},
     parentDetails: parentDetails || {},
     parent: parent || null,
     branch: branchId,
+    branchName,
     enrolledDepartments: enrolledDepartments || [],
     assignedTherapists: assignedTherapists || [],
     medicalNotes: medicalNotes || '',
@@ -49,14 +68,14 @@ export const createPatient = async (req, res) => {
   res.status(201).json(populated);
 };
 
-// ─── Get patients ─────────────────────────────────────────────────────────────
+// ─── Get patients/students ───────────────────────────────────────────────────
 // @route  GET /api/patients
-// Owner: all patients (filterable by branch/department)
+// Owner: all patients (filterable by branch/department/category)
 // Admin: patients in their branch
 // Therapist: patients assigned to them
 // Parent: their children only
 export const getPatients = async (req, res) => {
-  const { branch, department, status, search } = req.query;
+  const { branch, department, category, status, search } = req.query;
   let filter = {};
 
   if (req.user.role === 'owner') {
@@ -70,9 +89,15 @@ export const getPatients = async (req, res) => {
     filter.parent = req.user._id;
   }
 
+  if (category) filter.categories = { $in: [category.toLowerCase()] };
   if (department) filter.enrolledDepartments = { $in: [department] };
   if (status) filter.status = status;
-  if (search) filter.name = { $regex: search, $options: 'i' };
+  if (search) {
+    filter.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { studentId: { $regex: search, $options: 'i' } },
+    ];
+  }
 
   const patients = await Patient.find(filter)
     .populate('branch', 'name code city')
@@ -154,7 +179,7 @@ export const getPatientStats = async (req, res) => {
   const branchId = req.user.role === 'owner' ? req.query.branch : req.user.branch?._id;
   const filter = branchId ? { branch: branchId } : {};
 
-  const [total, active, discharged, byDept] = await Promise.all([
+  const [total, active, discharged, byDept, byCat] = await Promise.all([
     Patient.countDocuments(filter),
     Patient.countDocuments({ ...filter, status: 'active' }),
     Patient.countDocuments({ ...filter, status: 'discharged' }),
@@ -164,7 +189,13 @@ export const getPatientStats = async (req, res) => {
       { $group: { _id: '$enrolledDepartments', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
     ]),
+    Patient.aggregate([
+      { $match: filter },
+      { $unwind: '$categories' },
+      { $group: { _id: '$categories', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]),
   ]);
 
-  res.json({ total, active, discharged, byDepartment: byDept });
+  res.json({ total, active, discharged, byDepartment: byDept, byCategory: byCat });
 };

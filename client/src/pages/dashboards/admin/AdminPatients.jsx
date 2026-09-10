@@ -14,6 +14,7 @@ const AdminPatients = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('active');
 
   // Modals
@@ -41,6 +42,7 @@ const AdminPatients = () => {
         patientsApi.getAll({
           search: search || undefined,
           department: departmentFilter || undefined,
+          category: categoryFilter || undefined,
           status: statusFilter === 'all' ? undefined : statusFilter,
         }),
         patientsApi.getStats(),
@@ -56,7 +58,7 @@ const AdminPatients = () => {
 
   useEffect(() => {
     loadPatients();
-  }, [departmentFilter, statusFilter]);
+  }, [departmentFilter, categoryFilter, statusFilter]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -426,6 +428,18 @@ const AdminPatients = () => {
             />
           </div>
 
+          <div style={{ minWidth: 160 }}>
+            <select
+              className="select"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              <option value="">All Programs (School & Clinic)</option>
+              <option value="school">🎒 Special School</option>
+              <option value="clinic">🩺 Therapy Clinic</option>
+            </select>
+          </div>
+
           <div style={{ minWidth: 200 }}>
             <select
               className="select"
@@ -457,21 +471,21 @@ const AdminPatients = () => {
       {/* Patients Table */}
       <div className="card">
         <div className="card-header flex justify-between items-center">
-          <h2 className="section-title">Enrolled Patients ({patients.length})</h2>
-          <span className="text-xs text-muted">Showing records for {user?.branch?.code || 'Main'}</span>
+          <h2 className="section-title">Enrolled Students &amp; Patients ({patients.length})</h2>
+          <span className="text-xs text-muted">Showing records for {user?.branch?.code || 'Branch'}</span>
         </div>
 
         {loading ? (
           <div className="loading-screen" style={{ minHeight: 200 }}>
             <div className="spinner"></div>
-            <p className="mt-2">Loading patient directory...</p>
+            <p className="mt-2">Loading student directory...</p>
           </div>
         ) : patients.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">👶</div>
-            <div className="empty-title">No Patients Found</div>
+            <div className="empty-title">No Students/Patients Found</div>
             <div className="empty-desc">
-              {search || departmentFilter ? 'No patients matched your search filters.' : 'Click "+ Register New Child" to add the first patient.'}
+              {search || departmentFilter || categoryFilter ? 'No records matched your search filters.' : 'Click "+ Register New Child" to add the first student.'}
             </div>
           </div>
         ) : (
@@ -479,7 +493,8 @@ const AdminPatients = () => {
             <table>
               <thead>
                 <tr>
-                  <th>Child Name &amp; Age</th>
+                  <th>Student / Child</th>
+                  <th>Program / School</th>
                   <th>Primary Diagnosis</th>
                   <th>Enrolled Therapies</th>
                   <th>Parent / Contact</th>
@@ -499,17 +514,56 @@ const AdminPatients = () => {
                           {p.gender === 'female' ? '👧' : '👦'}
                         </div>
                         <div>
-                          <div
-                            className="font-bold text-primary"
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => setSelectedPatientForDetail(p)}
-                          >
-                            {p.name}
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="font-bold text-primary"
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => setSelectedPatientForDetail(p)}
+                            >
+                              {p.name}
+                            </span>
+                            {p.studentId && (
+                              <span
+                                className="badge"
+                                style={{
+                                  background: 'var(--surface-3)',
+                                  color: 'var(--text-secondary)',
+                                  fontSize: '0.65rem',
+                                  padding: '0.1rem 0.4rem',
+                                  fontFamily: 'monospace',
+                                  letterSpacing: '0.03em',
+                                }}
+                              >
+                                {p.studentId}
+                              </span>
+                            )}
                           </div>
                           <div className="text-xs text-muted">
                             Age {p.age} • {p.gender}
                           </div>
                         </div>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex gap-1 flex-wrap">
+                          {p.categories?.includes('school') && (
+                            <span className="badge badge-sm" style={{ background: '#fef3c7', color: '#92400e', fontSize: '0.7rem' }}>
+                              🎒 School
+                            </span>
+                          )}
+                          {p.categories?.includes('clinic') && (
+                            <span className="badge badge-sm" style={{ background: '#e0f2fe', color: '#0369a1', fontSize: '0.7rem' }}>
+                              🩺 Clinic
+                            </span>
+                          )}
+                        </div>
+                        {p.schoolDetails?.grade && (
+                          <span className="text-xs text-secondary font-medium">
+                            {p.schoolDetails.grade} {p.schoolDetails.section ? `(${p.schoolDetails.section})` : ''}
+                          </span>
+                        )}
                       </div>
                     </td>
 

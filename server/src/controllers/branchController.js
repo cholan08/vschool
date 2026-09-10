@@ -1,4 +1,5 @@
 import Branch from '../models/Branch.js';
+import Patient from '../models/Patient.js';
 
 // ─── Create Branch (owner only) ───────────────────────────────────────────────
 // @route  POST /api/branches
@@ -63,6 +64,12 @@ export const updateBranch = async (req, res) => {
     runValidators: true,
   });
   if (!branch) return res.status(404).json({ message: 'Branch not found' });
+
+  // If branch name changed, keep student records synchronized
+  if (req.body.name) {
+    await Patient.updateMany({ branch: branch._id }, { branchName: branch.name });
+  }
+
   res.json(branch);
 };
 

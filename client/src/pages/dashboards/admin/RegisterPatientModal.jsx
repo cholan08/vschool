@@ -23,10 +23,16 @@ const RegisterPatientModal = ({ branchId, onClose, onRegistered }) => {
 
   // Form State
   const [formData, setFormData] = useState({
-    // Step 1: Child
+    // Step 1: Child & Program
+    studentId: '',
     name: '',
     dateOfBirth: '',
     gender: 'male',
+    categories: ['clinic'], // 'school', 'clinic', or both
+    grade: '',
+    section: '',
+    rollNo: '',
+    academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
     diagnosis: '',
     customDiagnosis: '',
     // Step 2: Parent
@@ -142,9 +148,19 @@ const RegisterPatientModal = ({ branchId, onClose, onRegistered }) => {
         : formData.diagnosis;
 
     const payload = {
+      studentId: formData.studentId.trim() || undefined,
       name: formData.name.trim(),
       dateOfBirth: formData.dateOfBirth,
       gender: formData.gender,
+      categories: formData.categories,
+      schoolDetails: formData.categories.includes('school')
+        ? {
+            grade: formData.grade.trim(),
+            section: formData.section.trim(),
+            rollNo: formData.rollNo.trim(),
+            academicYear: formData.academicYear.trim(),
+          }
+        : {},
       diagnosis: finalDiagnosis,
       parentDetails: {
         name: formData.parentName.trim(),
@@ -244,6 +260,80 @@ const RegisterPatientModal = ({ branchId, onClose, onRegistered }) => {
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 autoFocus
+              />
+            </div>
+
+            {/* Program Type / Category */}
+            <div className="form-group">
+              <label className="form-label font-semibold">Program Enrollment Type *</label>
+              <div className="flex gap-2">
+                {[
+                  { key: 'clinic', label: '🩺 Therapy Clinic Only' },
+                  { key: 'school', label: '🎒 Special School Only' },
+                  { key: 'both', label: '🌟 Dual (School + Clinic)' },
+                ].map((item) => {
+                  const isSelected =
+                    item.key === 'both'
+                      ? formData.categories.includes('school') && formData.categories.includes('clinic')
+                      : formData.categories.length === 1 && formData.categories[0] === item.key;
+                  return (
+                    <button
+                      key={item.key}
+                      type="button"
+                      className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ flex: 1 }}
+                      onClick={() => {
+                        if (item.key === 'both') handleChange('categories', ['school', 'clinic']);
+                        else handleChange('categories', [item.key]);
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* School Details if School is selected */}
+            {formData.categories.includes('school') && (
+              <div className="card-compact" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+                <h4 className="font-semibold text-xs text-primary mb-2">🎒 Special School Enrollment Info</h4>
+                <div className="grid-2" style={{ gap: '0.75rem' }}>
+                  <div className="form-group">
+                    <label className="form-label text-xs">Class / Grade Level</label>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="e.g. Primary 1, KG-2"
+                      value={formData.grade}
+                      onChange={(e) => handleChange('grade', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label text-xs">Section / Group</label>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="e.g. Section A"
+                      value={formData.section}
+                      onChange={(e) => handleChange('section', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Optional Custom Student ID */}
+            <div className="form-group">
+              <label className="form-label font-semibold">
+                Admission / Student ID <span className="text-muted text-xs font-normal">(Optional - auto-generated if empty)</span>
+              </label>
+              <input
+                type="text"
+                className="input"
+                placeholder="e.g. BR001-STU-0005"
+                value={formData.studentId}
+                onChange={(e) => handleChange('studentId', e.target.value)}
               />
             </div>
 

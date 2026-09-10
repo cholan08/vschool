@@ -27,11 +27,12 @@ const Login = () => {
 
   // Quick-fill for dev testing
   const devLogins = [
-    { label: '👑 Owner', email: 'owner@pediatrictherapy.com' },
-    { label: '🛡️ Admin', email: 'admin.main@pediatrictherapy.com' },
-    { label: '💊 Therapist', email: 'speech@pediatrictherapy.com' },
-    { label: '👩‍🏫 Teacher', email: 'teacher@pediatrictherapy.com' },
-    { label: '👨‍👩‍👧 Parent', email: 'parent1@example.com' },
+    { role: 'Owner', email: 'owner@vschool.com' },
+    { role: 'Admin (GDV)', email: 'admin.guduvancherry@vschool.com' },
+    { role: 'Admin (VDL)', email: 'admin.vandalur@vschool.com' },
+    { role: 'Therapist', email: 'speech.gdv@vschool.com' },
+    { role: 'Teacher', email: 'teacher.gdv@vschool.com' },
+    { role: 'Parent', email: 'parent.gdv@example.com' },
   ];
 
   return (
@@ -136,7 +137,7 @@ const Login = () => {
                     className="dev-login-item"
                     onClick={() => setForm({ email: d.email, password: 'password123' })}
                   >
-                    <span className="dev-login-role" style={{ background: 'var(--primary)' }}>{d.label.split(' ')[1]}</span>
+                    <span className="dev-login-role" style={{ background: 'var(--primary)' }}>{d.role}</span>
                     <span className="dev-login-email">{d.email}</span>
                     <span className="dev-login-action">Select</span>
                   </div>

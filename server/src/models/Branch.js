@@ -37,6 +37,12 @@ const branchSchema = new mongoose.Schema(
       lowercase: true,
       default: '',
     },
+    // Facilities offered at this branch (School, Clinic, or both)
+    facilities: {
+      type: [String],
+      enum: ['school', 'clinic'],
+      default: ['school', 'clinic'],
+    },
     // Which of the 10 departments does this branch offer
     departments: {
       type: [String],
